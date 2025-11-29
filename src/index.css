@@ -1,0 +1,134 @@
+/* election-app/src/index.css */
+/* وارد کردن فونت وزیر متن از گوگل */
+@import url("https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap");
+
+body {
+  margin: 0;
+  padding: 0;
+  /* اعمال فونت به کل صفحه */
+  font-family: "Vazirmatn", sans-serif;
+  background-color: #f8f9fa; /* یک رنگ پس‌زمینه خیلی روشن و تمیز */
+  color: #333;
+}
+
+button {
+  font-family: "Vazirmatn", sans-serif; /* دکمه‌ها هم فونت بگیرند */
+}
+
+/* تنظیمات مخصوص پرینت */
+@media print {
+  /* مخفی کردن موارد اضافی */
+  .no-print,
+  button,
+  .recharts-wrapper,
+  h2 {
+    display: none !important;
+  }
+
+  body {
+    background-color: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 1cm; /* حاشیه کاغذ را کم کردم */
+  }
+  .main-container {
+    background-color: white !important; /* پس‌زمینه سفید اجباری */
+    padding: 0 !important; /* حذف پدینگ‌های مزاحم */
+    min-height: auto !important; /* حذف ارتفاع مزاحم */
+    height: auto !important;
+    width: 100% !important;
+
+    /* کوچک کردن کل محتوا برای اطمینان از جا شدن در یک صفحه */
+    transform-origin: top center;
+  }
+  /* --- تنظیمات جدید: کوچک کردن سربرگ --- */
+  body::before {
+    content: "نتایج رسمی انتخابات هیئت رهبری کلیسا";
+    display: block;
+    text-align: center;
+    font-size: 24pt; /* فونت سربرگ کوچک شد */
+    font-weight: bold;
+    margin-bottom: 10px; /* فاصله پایین سربرگ کم شد */
+    border-bottom: 1px solid black;
+    padding-bottom: 5px;
+  }
+
+  /* --- تنظیمات جدید: کوچک کردن آمار (آبی/سبز/قرمز) --- */
+  .print-stats {
+    display: flex !important; /* تبدیل به حالت خطی فشرده */
+    gap: 10px !important;
+    margin-bottom: 15px !important;
+    grid-template-columns: none !important;
+  }
+
+  /* کوچک کردن خود باکس‌ها */
+  .print-stats > div {
+    padding: 5px 10px !important; /* پدینگ خیلی کم شد */
+    border-radius: 5px !important;
+    flex: 1; /* تقسیم مساوی فضا */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-direction: row !important; /* عدد و متن کنار هم */
+    border: 1px solid #ccc !important; /* بوردر نازک */
+    box-shadow: none !important;
+  }
+
+  /* کوچک کردن متن‌های داخل باکس آمار */
+  .print-stats span {
+    font-size: 9pt !important;
+  }
+
+  /* کوچک کردن عددهای بزرگ داخل باکس آمار */
+  .print-stats strong,
+  .print-stats div[style*="fontSize: 1.5rem"],
+  .print-stats div[style*="fontSize: 2rem"] {
+    font-size: 11pt !important;
+    margin-right: 10px;
+  }
+
+  /* --- تنظیمات دو ستونه بودن لیست --- */
+  .print-columns-container {
+    column-count: 2;
+    column-gap: 15px;
+    width: 100%;
+  }
+
+  .print-columns-container > div {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 10px;
+    border-width: 1px !important; /* نازک کردن کادر لیست‌ها */
+  }
+
+  /* کوچک کردن فونت لیست کاندیداها */
+  .print-columns-container h3 {
+    font-size: 11pt !important;
+    margin-bottom: 5px !important;
+    padding: 5px !important;
+  }
+
+  /* کوچک کردن ردیف‌های اسم */
+  .print-columns-container div[style*="padding: 12px 15px"] {
+    padding: 4px 8px !important; /* ارتفاع هر سطر کم شد */
+    font-size: 10pt !important;
+  }
+
+  /* امضا */
+  body::after {
+    content: "امضای هیئت نظارت: ____________________";
+    position: fixed; /* این خط باعث میشه بچسبه پایین و صفحه جدید نسازه */
+    bottom: 0;
+    left: 0; /* در انگلیسی left میشه همون چپ، ولی چون rtl هستیم میاد راست */
+    right: 0;
+    padding: 10px;
+    background: white;
+    font-size: 10pt;
+    text-align: left; /* امضا بیاد سمت چپ کاغذ */
+  }
+}
