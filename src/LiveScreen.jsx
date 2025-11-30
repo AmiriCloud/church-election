@@ -1,17 +1,144 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-// اتصال به دیتابیس
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// لیست کاندیداها (برای خلاصه شدن، همان لیست فایل AdminPage را اینجا کپی کنید)
+// تابع تبدیل به فارسی
+const toPersianDigits = (n) => {
+  if (n === undefined || n === null) return "";
+  const farsiDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+  return n.toString().replace(/\d/g, (x) => farsiDigits[x]);
+};
+
+// لیست کاندیداها
 const candidatesList = [
-  { id: 1, name: "یلدا محمدی" },
-  { id: 2, name: "یاسمن ده‌بزرگی" },
-  // ... (لطفاً بقیه ۲۵ نفر را اینجا کپی کنید) ...
-  { id: 25, name: "آرتمیس محب" },
+  {
+    id: 1,
+    name: "یلدا محمدی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/103061257-1643067498/avatar.1.jpg?g=350x350%23",
+  },
+  {
+    id: 2,
+    name: "یاسمن ده‌بزرگی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586649-1641944475/avatar.1.jpeg?g=350x350%23",
+  },
+  {
+    id: 3,
+    name: "کیارش کیانی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102677948-1642201294/avatar.3.png?g=350x350%23",
+  },
+  {
+    id: 4,
+    name: "هنگامه حمزوی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/104805225-1646270967/avatar.1.png?g=350x350%23",
+  },
+  {
+    id: 5,
+    name: "هانیه امیری",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586472-1641944464/avatar.1.jpeg?g=350x350%23",
+  },
+  {
+    id: 6,
+    name: "نگار کیانی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102684631-1642258975/avatar.1.jpg?g=350x350%23",
+  },
+  {
+    id: 7,
+    name: "میترا وثوقیان",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586498-1641944466/avatar.2.jpeg?g=350x350%23",
+  },
+  {
+    id: 8,
+    name: "مهسا امیری",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586477-1641922700/avatar.3.png?g=350x350%23",
+  },
+  {
+    id: 9,
+    name: "مهدی آقاجان",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102674806-1642189773/avatar.3.jpg?g=350x350%23",
+  },
+  {
+    id: 10,
+    name: "منصوره الیاسی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586624-1641944473/avatar.4.jpg?g=350x350%23",
+  },
+  {
+    id: 11,
+    name: "مجید طالعی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/127533535-1685880581/avatar.2.jpeg?g=350x350%23",
+  },
+  {
+    id: 12,
+    name: "لیلا بهرامی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/104805812-1646271985/avatar.2.jpeg?g=350x350%23",
+  },
+  {
+    id: 13,
+    name: "فریبا ذوقی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586489-1641944465/avatar.2.jpg?g=350x350%23",
+  },
+  {
+    id: 14,
+    name: "عبدالرضا هشترودی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586503-1641944466/avatar.2.png?g=350x350%23",
+  },
+  {
+    id: 15,
+    name: "شیما پیشه‌ورز",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586551-1641944469/avatar.1.jpg?g=350x350%23",
+  },
+  {
+    id: 16,
+    name: "سارا رحیمی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586511-1641944466/avatar.2.jpeg?g=350x350%23",
+  },
+  {
+    id: 17,
+    name: "حدیث باستانی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586530-1641944467/avatar.5.jpg?g=350x350%23",
+  },
+  {
+    id: 18,
+    name: "تالی هوسپیان",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586478-1641944464/avatar.1.jpg?g=350x350%23",
+  },
+  {
+    id: 19,
+    name: "باقر احمدی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/103081209-1643108412/avatar.2.png?g=350x350%23",
+  },
+  {
+    id: 20,
+    name: "امیر امیری",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586479-1641944464/avatar.1.jpeg?g=350x350%23",
+  },
+  {
+    id: 21,
+    name: "الناز گودرزی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/127532557-1685875357/avatar.1.jpeg?g=350x350%23",
+  },
+  {
+    id: 22,
+    name: "احد زمستانی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586542-1641944468/avatar.2.jpeg?g=350x350%23",
+  },
+  {
+    id: 23,
+    name: "آنیتا ولتر",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586548-1641944468/avatar.1.jpeg?g=350x350%23",
+  },
+  {
+    id: 24,
+    name: "آزیتا فرسایی",
+    img: "https://avatars.planningcenteronline.com/uploads/person/103358655-1643653523/avatar.1.jpg?g=350x350%23",
+  },
+  {
+    id: 25,
+    name: "آرتمیس محب",
+    img: "https://avatars.planningcenteronline.com/uploads/person/102586534-1641944467/avatar.2.png?g=350x350%23",
+  },
 ];
 
 export default function LiveScreen() {
@@ -20,20 +147,18 @@ export default function LiveScreen() {
     conflict: [],
     reserves: [],
   });
-  const [totalVotes, setTotalVotes] = useState(0); // تعداد رای‌های ریخته شده
+  const [totalVotes, setTotalVotes] = useState(0);
   const [meetingSettings, setMeetingSettings] = useState({
     total_members: 200,
     present_members: 0,
   });
 
   const fetchResults = async () => {
-    // 1. دریافت تنظیمات جلسه (مهم‌ترین بخش برای حد نصاب)
     const { data: settings } = await supabase
       .from("settings")
       .select("*")
       .eq("id", 1)
       .single();
-
     if (settings) {
       setMeetingSettings({
         total_members: settings.total_members,
@@ -41,13 +166,11 @@ export default function LiveScreen() {
       });
     }
 
-    // 2. تعداد برگه‌های رای (مشارکت)
     const { count } = await supabase
       .from("votes")
       .select("*", { count: "exact", head: true });
     setTotalVotes(count || 0);
 
-    // 3. محاسبه نتایج (همیشه می‌گیریم تا آماده باشد)
     const { data: voteCounts } = await supabase.rpc("get_vote_counts");
     if (voteCounts) {
       const votesMap = {};
@@ -60,8 +183,8 @@ export default function LiveScreen() {
         votes: votesMap[person.id] || 0,
       }));
 
-      // مرتب‌سازی و رتبه‌بندی
       allCandidates.sort((a, b) => b.votes - a.votes || a.id - b.id);
+
       let currentRank = 1;
       allCandidates = allCandidates.map((item, index) => {
         if (index > 0 && item.votes < allCandidates[index - 1].votes)
@@ -69,7 +192,6 @@ export default function LiveScreen() {
         return { ...item, rank: currentRank };
       });
 
-      // گروه‌بندی
       const CAPACITY = 12;
       if (allCandidates.length <= 12) {
         setGroups({ safe: allCandidates, conflict: [], reserves: [] });
@@ -98,20 +220,15 @@ export default function LiveScreen() {
 
   useEffect(() => {
     fetchResults();
-    const interval = setInterval(fetchResults, 3000); // آپدیت ۳ ثانیه
+    const interval = setInterval(fetchResults, 3000);
     return () => clearInterval(interval);
   }, []);
 
   const remainingSeats = 12 - groups.safe.length;
-
-  // محاسبه منطق حد نصاب
   const quorum = Math.floor(meetingSettings.total_members / 2) + 1;
-  // شرط کلیدی: آیا تعداد حاضرین بیشتر یا مساوی حد نصاب است؟
   const isQuorumMet = meetingSettings.present_members >= quorum;
 
-  // ----------------------------------------------------------------
-  // حالت ۱: عدم حد نصاب (نمایش هشدار)
-  // ----------------------------------------------------------------
+  // حالت ۱: عدم حد نصاب
   if (!isQuorumMet) {
     return (
       <div
@@ -160,7 +277,7 @@ export default function LiveScreen() {
               کل اعضا
             </span>
             <strong style={{ fontSize: "4rem", color: "#fff" }}>
-              {meetingSettings.total_members}
+              {toPersianDigits(meetingSettings.total_members)}
             </strong>
           </div>
 
@@ -186,7 +303,7 @@ export default function LiveScreen() {
               حد نصاب لازم
             </span>
             <strong style={{ fontSize: "4rem", color: "#3b82f6" }}>
-              {quorum}
+              {toPersianDigits(quorum)}
             </strong>
           </div>
 
@@ -211,12 +328,11 @@ export default function LiveScreen() {
               حاضرین فعلی
             </span>
             <strong style={{ fontSize: "4rem", color: "#f87171" }}>
-              {meetingSettings.present_members}
+              {toPersianDigits(meetingSettings.present_members)}
             </strong>
           </div>
         </div>
 
-        {/* باکس توضیح متنی */}
         <div
           style={{
             maxWidth: "900px",
@@ -240,8 +356,9 @@ export default function LiveScreen() {
           <p
             style={{ fontSize: "1.4rem", lineHeight: "1.8", color: "#cbd5e1" }}
           >
-            با توجه به اینکه تعداد حاضرین کمتر از نصف به علاوه یک اعضا ({quorum}{" "}
-            نفر) می‌باشد، امکان اعلام نتایج قطعی در این جلسه وجود ندارد.
+            با توجه به اینکه تعداد حاضرین کمتر از نصف به علاوه یک اعضا (
+            {toPersianDigits(quorum)} نفر) می‌باشد، امکان اعلام نتایج قطعی در
+            این جلسه وجود ندارد.
             <br />
             <br />
             <span style={{ color: "#fff", fontWeight: "bold" }}>
@@ -255,9 +372,7 @@ export default function LiveScreen() {
     );
   }
 
-  // ----------------------------------------------------------------
-  // حالت ۲: حد نصاب رسیده (نمایش نتایج)
-  // ----------------------------------------------------------------
+  // حالت ۲: حد نصاب رسیده
   return (
     <div
       style={{
@@ -270,7 +385,6 @@ export default function LiveScreen() {
         overflowX: "hidden",
       }}
     >
-      {/* هدر */}
       <div
         style={{
           display: "flex",
@@ -299,7 +413,8 @@ export default function LiveScreen() {
               display: "block",
             }}
           >
-            ✅ جلسه با {meetingSettings.present_members} نفر حاضر رسمیت یافت
+            ✅ جلسه با {toPersianDigits(meetingSettings.present_members)} نفر
+            حاضر رسمیت یافت
           </span>
         </div>
         <div
@@ -315,13 +430,12 @@ export default function LiveScreen() {
             آرای شمارش شده:{" "}
           </span>
           <strong style={{ fontSize: "2.5rem", color: "#4ade80" }}>
-            {totalVotes}
+            {toPersianDigits(totalVotes)}
           </strong>
         </div>
       </div>
 
       <div style={{ display: "flex", gap: "40px" }}>
-        {/* ستون اصلی: منتخبین */}
         <div style={{ flex: 2 }}>
           <h2
             style={{
@@ -333,7 +447,8 @@ export default function LiveScreen() {
               gap: "10px",
             }}
           >
-            <span>✅</span> منتخبین شورای رهبری ({groups.safe.length} نفر)
+            <span>✅</span> منتخبین هئیت رهبری (
+            {toPersianDigits(groups.safe.length)} نفر)
           </h2>
           <div
             style={{
@@ -348,7 +463,6 @@ export default function LiveScreen() {
           </div>
         </div>
 
-        {/* ستون کناری */}
         <div
           style={{
             flex: 1.2,
@@ -357,7 +471,6 @@ export default function LiveScreen() {
             gap: "30px",
           }}
         >
-          {/* گره انتخاباتی */}
           {groups.conflict.length > 0 && (
             <div
               style={{
@@ -384,8 +497,8 @@ export default function LiveScreen() {
                   margin: "0 0 20px 0",
                 }}
               >
-                {groups.conflict.length} نفر برای {remainingSeats} صندلی
-                باقی‌مانده
+                {toPersianDigits(groups.conflict.length)} نفر برای{" "}
+                {toPersianDigits(remainingSeats)} صندلی باقی‌مانده
               </p>
               <div
                 style={{
@@ -401,7 +514,6 @@ export default function LiveScreen() {
             </div>
           )}
 
-          {/* رزروها */}
           {groups.reserves.length > 0 && (
             <div>
               <h3
@@ -433,7 +545,6 @@ export default function LiveScreen() {
   );
 }
 
-// کامپوننت‌های کمکی (همان قبلی‌ها)
 function LiveCard({ person, color }) {
   return (
     <div
@@ -471,10 +582,10 @@ function LiveCard({ person, color }) {
               fontWeight: "bold",
             }}
           >
-            رتبه {person.rank}
+            رتبه {toPersianDigits(person.rank)}
           </span>
           <span style={{ color: "#cbd5e1", fontSize: "1.1rem" }}>
-            {person.votes} رای
+            {toPersianDigits(person.votes)} رای
           </span>
         </div>
       </div>
@@ -508,12 +619,12 @@ function LiveRow({ person, color }) {
             fontWeight: "bold",
           }}
         >
-          {person.rank}
+          {toPersianDigits(person.rank)}
         </span>
         <span style={{ fontSize: "1.2rem" }}>{person.name}</span>
       </div>
       <strong style={{ fontSize: "1.2rem", color: color }}>
-        {person.votes}
+        {toPersianDigits(person.votes)}
       </strong>
     </div>
   );

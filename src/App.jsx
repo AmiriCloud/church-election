@@ -1,15 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 
-// اتصال به دیتابیس
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// لیست کاندیداها
+// تابع تبدیل اعداد به فارسی
+const toPersianDigits = (n) => {
+  if (n === undefined || n === null) return "";
+  const farsiDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+  return n.toString().replace(/\d/g, (x) => farsiDigits[x]);
+};
+
+// لیست کاندیداها (همان لیست قبلی)
 const candidates = [
-  // گروه ۱
   {
     id: 1,
     name: "یلدا محمدی",
@@ -35,8 +40,6 @@ const candidates = [
     name: "هانیه امیری",
     img: "https://avatars.planningcenteronline.com/uploads/person/102586472-1641944464/avatar.1.jpeg?g=350x350%23",
   },
-
-  // گروه ۲
   {
     id: 6,
     name: "نگار کیانی",
@@ -62,8 +65,6 @@ const candidates = [
     name: "منصوره الیاسی",
     img: "https://avatars.planningcenteronline.com/uploads/person/102586624-1641944473/avatar.4.jpg?g=350x350%23",
   },
-
-  // گروه ۳
   {
     id: 11,
     name: "مجید طالعی",
@@ -89,8 +90,6 @@ const candidates = [
     name: "شیما پیشه‌ورز",
     img: "https://avatars.planningcenteronline.com/uploads/person/102586551-1641944469/avatar.1.jpg?g=350x350%23",
   },
-
-  // گروه ۴
   {
     id: 16,
     name: "سارا رحیمی",
@@ -116,8 +115,6 @@ const candidates = [
     name: "امیر امیری",
     img: "https://avatars.planningcenteronline.com/uploads/person/102586479-1641944464/avatar.1.jpeg?g=350x350%23",
   },
-
-  // گروه ۵
   {
     id: 21,
     name: "الناز گودرزی",
@@ -148,10 +145,26 @@ const candidates = [
 function App() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVotingActive, setIsVotingActive] = useState(false); // وضعیت فعال بودن
   const navigate = useNavigate();
 
-  // انتخاب/حذف کاندیدا
+  // بررسی وضعیت رای‌گیری در لحظه لود شدن و هر 5 ثانیه
+  useEffect(() => {
+    const checkVotingStatus = async () => {
+      const { data } = await supabase
+        .from("settings")
+        .select("is_voting_active")
+        .eq("id", 1)
+        .single();
+      if (data) setIsVotingActive(data.is_voting_active);
+    };
+    checkVotingStatus();
+    const interval = setInterval(checkVotingStatus, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const toggleCandidate = (id) => {
+    if (!isVotingActive) return; // اگر بسته است، انتخاب نکن
     if (selectedIds.includes(id)) {
       setSelectedIds(selectedIds.filter((item) => item !== id));
     } else {
@@ -163,9 +176,8 @@ function App() {
     }
   };
 
-  // 1. ثبت رای صحیح (سبز)
   const submitVote = async () => {
-    // جلوگیری از ثبت رای خالی با دکمه سبز
+    if (!isVotingActive) return alert("⛔ رای‌گیری در حال حاضر متوقف شده است.");
     if (selectedIds.length === 0)
       return alert(
         "❌ هنوز کسی را انتخاب نکرده‌اید! برای رای سفید از دکمه قرمز استفاده کنید."
@@ -178,9 +190,8 @@ function App() {
     handlePostSubmit(error, "رای شما با موفقیت ثبت شد ✅");
   };
 
-  // 2. ثبت رای باطله/سفید (قرمز)
   const submitInvalidVote = async () => {
-    // گرفتن تاییدیه برای جلوگیری از کلیک اشتباه
+    if (!isVotingActive) return alert("⛔ رای‌گیری در حال حاضر متوقف شده است.");
     if (
       !window.confirm(
         "⚠️ آیا مطمئن هستید که می‌خواهید رای باطله (سفید) ثبت کنید؟"
@@ -189,14 +200,12 @@ function App() {
       return;
 
     setIsSubmitting(true);
-    // ارسال آرایه خالی به معنی رای باطله
     const { error } = await supabase
       .from("votes")
       .insert([{ selected_candidates: [] }]);
     handlePostSubmit(error, "رای باطله (سفید) ثبت شد ⚪");
   };
 
-  // تابع مشترک بعد از ثبت
   const handlePostSubmit = (error, successMessage) => {
     if (error) {
       alert("خطا در ثبت رای! لطفا اینترنت را چک کنید.");
@@ -209,7 +218,6 @@ function App() {
     setIsSubmitting(false);
   };
 
-  // ورود ادمین
   const handleAdminLogin = () => {
     const password = prompt("لطفاً رمز ورود مدیر را وارد کنید:");
     if (password === "1234") {
@@ -234,81 +242,115 @@ function App() {
         style={{
           position: "sticky",
           top: 10,
-          backgroundColor: "rgba(255,255,255,0.95)",
+          backgroundColor: isVotingActive
+            ? "rgba(255,255,255,0.95)"
+            : "#ffe4e6", // اگر بسته باشد قرمز می‌شود
           padding: "10px 15px",
           borderRadius: "15px",
-          border: "1px solid #eee",
+          border: isVotingActive ? "1px solid #eee" : "2px solid #e11d48",
           zIndex: 100,
           boxShadow: "0 4px 15px -3px rgba(0,0,0,0.1)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
           marginBottom: "20px",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span style={{ fontSize: "0.8rem", color: "#888" }}>
-            تعداد رای شما:
-          </span>
-          <div style={{ display: "flex", alignItems: "baseline", gap: "5px" }}>
-            <strong
+        {/* پیام توقف رای‌گیری */}
+        {!isVotingActive && (
+          <div
+            style={{
+              textAlign: "center",
+              color: "#e11d48",
+              fontWeight: "bold",
+              marginBottom: "10px",
+              fontSize: "0.9rem",
+            }}
+          >
+            ⛔ رای‌گیری موقتاً متوقف شده است
+          </div>
+        )}
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              opacity: isVotingActive ? 1 : 0.5,
+            }}
+          >
+            <span style={{ fontSize: "0.8rem", color: "#888" }}>
+              تعداد رای شما:
+            </span>
+            <div
+              style={{ display: "flex", alignItems: "baseline", gap: "5px" }}
+            >
+              <strong
+                style={{
+                  fontSize: "1.4rem",
+                  color: selectedIds.length === 12 ? "#28a745" : "#333",
+                }}
+              >
+                {toPersianDigits(selectedIds.length)}
+              </strong>
+              <span style={{ fontSize: "0.9rem", color: "#999" }}>
+                / {toPersianDigits(12)}
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              onClick={submitInvalidVote}
+              disabled={isSubmitting || !isVotingActive}
               style={{
-                fontSize: "1.4rem",
-                color: selectedIds.length === 12 ? "#28a745" : "#333",
+                padding: "8px 15px",
+                fontSize: "0.8rem",
+                backgroundColor:
+                  isSubmitting || !isVotingActive ? "#ccc" : "#ef4444",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontWeight: "bold",
+                cursor:
+                  isSubmitting || !isVotingActive ? "not-allowed" : "pointer",
               }}
             >
-              {selectedIds.length}
-            </strong>
-            <span style={{ fontSize: "0.9rem", color: "#999" }}>/ 12</span>
+              باطله ⚪
+            </button>
+
+            <button
+              onClick={submitVote}
+              disabled={
+                isSubmitting || selectedIds.length === 0 || !isVotingActive
+              }
+              style={{
+                padding: "8px 20px",
+                fontSize: "0.9rem",
+                backgroundColor:
+                  isSubmitting || selectedIds.length === 0 || !isVotingActive
+                    ? "#ccc"
+                    : "#28a745",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontWeight: "bold",
+                cursor:
+                  isSubmitting || selectedIds.length === 0 || !isVotingActive
+                    ? "not-allowed"
+                    : "pointer",
+                boxShadow:
+                  isSubmitting || selectedIds.length === 0 || !isVotingActive
+                    ? "none"
+                    : "0 2px 5px rgba(40, 167, 69, 0.3)",
+              }}
+            >
+              {isSubmitting ? "..." : "ثبت رای ✅"}
+            </button>
           </div>
-        </div>
-
-        {/* دکمه‌های عملیاتی */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          {/* دکمه قرمز (باطله) */}
-          <button
-            onClick={submitInvalidVote}
-            disabled={isSubmitting}
-            style={{
-              padding: "8px 15px",
-              fontSize: "0.8rem",
-              backgroundColor: isSubmitting ? "#ccc" : "#ef4444", // قرمز
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              fontWeight: "bold",
-              cursor: isSubmitting ? "not-allowed" : "pointer",
-            }}
-          >
-            باطله ⚪
-          </button>
-
-          {/* دکمه سبز (ثبت اصلی) */}
-          <button
-            onClick={submitVote}
-            // اگر کسی انتخاب نشده باشد یا در حال ارسال باشد، غیرفعال است
-            disabled={isSubmitting || selectedIds.length === 0}
-            style={{
-              padding: "8px 20px",
-              fontSize: "0.9rem",
-              backgroundColor:
-                isSubmitting || selectedIds.length === 0 ? "#ccc" : "#28a745", // سبز یا طوسی
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              fontWeight: "bold",
-              cursor:
-                isSubmitting || selectedIds.length === 0
-                  ? "not-allowed"
-                  : "pointer",
-              boxShadow:
-                isSubmitting || selectedIds.length === 0
-                  ? "none"
-                  : "0 2px 5px rgba(40, 167, 69, 0.3)",
-            }}
-          >
-            {isSubmitting ? "..." : "ثبت رای ✅"}
-          </button>
         </div>
       </div>
 
@@ -318,6 +360,8 @@ function App() {
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           gap: "10px",
+          opacity: isVotingActive ? 1 : 0.6,
+          pointerEvents: isVotingActive ? "auto" : "none",
         }}
       >
         {candidates.map((person) => {
@@ -377,7 +421,7 @@ function App() {
                     borderRadius: "4px",
                   }}
                 >
-                  کد {person.id}
+                  کد {toPersianDigits(person.id)}
                 </span>
               </div>
               {isSelected && (

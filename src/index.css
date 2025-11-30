@@ -15,6 +15,11 @@ button {
   font-family: "Vazirmatn", sans-serif; /* دکمه‌ها هم فونت بگیرند */
 }
 
+/* کلاس کمکی برای چیزهایی که فقط در پرینت باید دیده شوند */
+.only-print {
+  display: none !important;
+}
+
 /* تنظیمات مخصوص پرینت */
 @media print {
   /* مخفی کردن موارد اضافی */
@@ -57,7 +62,20 @@ button {
     border-bottom: 1px solid black;
     padding-bottom: 5px;
   }
+  .print-meeting-info {
+    display: flex !important;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border: 1px solid #000;
+    border-radius: 6px;
+    background-color: #f0f0f0 !important; /* پس‌زمینه طوسی ملایم */
+    padding: 8px 15px !important;
+  }
 
+  .print-meeting-info div {
+    font-size: 11pt;
+    font-weight: bold;
+  }
   /* --- تنظیمات جدید: کوچک کردن آمار (آبی/سبز/قرمز) --- */
   .print-stats {
     display: flex !important; /* تبدیل به حالت خطی فشرده */
@@ -86,7 +104,7 @@ button {
 
   /* کوچک کردن عددهای بزرگ داخل باکس آمار */
   .print-stats strong,
-  .print-stats div[style*="fontSize: 1.5rem"],
+  .print-stats div[style*="fontSize: 2rem"],
   .print-stats div[style*="fontSize: 2rem"] {
     font-size: 11pt !important;
     margin-right: 10px;
@@ -108,7 +126,7 @@ button {
 
   /* کوچک کردن فونت لیست کاندیداها */
   .print-columns-container h3 {
-    font-size: 11pt !important;
+    font-size: 15pt !important;
     margin-bottom: 5px !important;
     padding: 5px !important;
   }
@@ -123,7 +141,7 @@ button {
   body::after {
     content: "امضای هیئت نظارت: ____________________";
     position: fixed; /* این خط باعث میشه بچسبه پایین و صفحه جدید نسازه */
-    bottom: 0;
+    bottom: 30px;
     left: 0; /* در انگلیسی left میشه همون چپ، ولی چون rtl هستیم میاد راست */
     right: 0;
     padding: 10px;
