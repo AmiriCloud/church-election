@@ -120,7 +120,7 @@ export default function AdminPage() {
         return { ...item, rank: currentRank };
       });
 
-      setChartData(allCandidates.slice(0, 20));
+      setChartData(allCandidates);
 
       const CAPACITY = 12;
       if (allCandidates.length <= 12) {
@@ -634,7 +634,7 @@ export default function AdminPage() {
           >
             📊 نمودار پیشتازها
           </h3>
-          <div style={{ height: "600px", width: "100%" }}>
+          <div style={{ height: "800px", width: "100%" }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 layout="vertical"
